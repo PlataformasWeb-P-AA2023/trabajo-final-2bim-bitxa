@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/estilos.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css">
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+    <title>
+      {% block title %}
+      {% endblock %}
+    </title>
+  </head>
+  <body>
+  <header>
+  <img src="{% static 'images/logo.png' %}" height="10%" width="10%">
+    <h1>Administración</h1>
+  </header>
+  
+
+    <div class="">
+        {% if messages %}
+          <div class="messages">
+            {% for message in messages %}
+            <span{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</span>
+            {% endfor %}
+          </div>
+        {% endif %}
+    </div>
+    <nav class="top_menu">
+  <div class="nav_container">
+    <ul>
+      {% url 'listar_barrios' as barrios_url %}
+      <li><a {% if request.path == barrios_url %} class="active"{% endif %} href="{{ barrios_url }}">Barrios</a></li>
+      
+      {% url 'listar_personas' as personas_url %}
+      <li><a {% if request.path == personas_url %} class="active"{% endif %} href="{{ personas_url }}">Personas</a></li>
+      
+      {% url 'listar_locales_repuestos' as repuestos_url %}
+      <li><a {% if request.path == repuestos_url %} class="active"{% endif %} href="{{ repuestos_url }}">Locales de Repuestos</a></li>
+      
+      {% url 'listar_locales_comida' as comida_url %}
+      <li><a {% if request.path == comida_url %} class="active"{% endif %} href="{{ comida_url }}">Locales de Comida</a></li>
+    </ul>
+    {% if user.is_authenticated %}
+    <div class="auth_container">
+      <span class="nombre_usuario"> <b>@</b> {{user.username}} </span>
+      <button type="button" class="btn btn-danger"><a href="{% url 'logout' %}">Salir</a></button>
+    </div>
+    {% else %}
+    <div class="auth_container">
+      <button type="button" class="btn btn-success"><a href="{% url 'login' %}">Ingresar</a></button>
+    </div>
+    {% endif %}
+  </div>
+</nav>
+  
+  <section>
+      {% block content %}
+      {% endblock %}
+  </section>
+
+    <footer>
+      <p>Loja-Ecuador</p>
+      <p>{% now "j F Y H:i" %}</p>
+    </footer>
+  </body>
+</html>

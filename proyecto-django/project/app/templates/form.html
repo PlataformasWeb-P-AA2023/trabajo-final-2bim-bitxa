@@ -1,0 +1,9 @@
+{% extends "master.html" %} {% block content %}
+
+<button onclick="window.history.back();" type="button"  class="btn btn-dark btn-sm" style="width:10%">Volver</button>
+<form method="post">
+  <h2>{% if form.instance.pk %} Editar {% else %} Nuevo {% endif %}</h2>
+  {% csrf_token %} {{ form.as_p }}
+  <button type="submit">Guardar</button>
+</form>
+{% endblock %}

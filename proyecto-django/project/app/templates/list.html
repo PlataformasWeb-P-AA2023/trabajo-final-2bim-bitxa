@@ -1,0 +1,118 @@
+{% extends "master.html" %} {% load my_filters %} {% block title %} Listado de
+{{ object_type }} {% endblock %} {% block content %}
+<h6 class="pt-2 pb-2" style="align-self: flex-start">
+  <b>Número {{ object_type }}:</b> {{ objects_list.count }}
+</h6>
+
+<table id="tabla_datos">
+  <thead>
+    <tr>
+      {% for header in headers %}
+      <th>{{ header }}</th>
+      {% endfor %}
+      <th>Acciones</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {% for object in objects_list %}
+    <tr>
+      {% for header in headers %} {% if header == 'pago_permiso' %}
+      <td>{{ object.pago_permiso }}</td>
+      {% else %}
+      <td>{{ object|get_attribute:header }}</td>
+      {% endif %} {% endfor %}
+      <td>
+        {% if object_type == 'barrios' %}
+        <a class="warning" href="{% url 'editar_barrio' object.id %}">editar</a>
+        <br />
+        <a
+          class="danger"
+          href="{% url 'borrar_barrio' object.id %}"
+          onclick="return confirm('¿Está seguro de la eliminación?')"
+          >eliminar</a
+        >
+        {% elif object_type == 'personas' %}
+        <a class="warning" href="{% url 'editar_persona' object.id %}"
+          >editar</a
+        >
+        <br />
+        {% if user.is_authenticated %}
+        <a
+          class="danger"
+          href="{% url 'borrar_persona' object.id %}"
+          onclick="return confirm('¿Está seguro de la eliminación?')"
+          >eliminar</a
+        >
+        {% else %}
+        <a class="danger" href="{% url 'login' %}">eliminar</a>
+        {% endif %} {% elif object_type == 'locales repuestos' %}
+        <a class="warning" href="{% url 'editar_local_repuesto' object.id %}"
+          >editar</a
+        >
+        <br />
+        {% if user.is_authenticated %}
+        <a
+          class="danger"
+          href="{% url 'borrar_local_repuesto' object.id %}"
+          onclick="return confirm('¿Está seguro de la eliminación?')"
+          >eliminar</a
+        >
+        {% else %}
+        <a class="danger" href="{% url 'login' %}">eliminar</a>
+        {% endif %} {% elif object_type == 'locales comida' %}
+        <a class="warning" href="{% url 'editar_local_comida' object.id %}"
+          >editar</a
+        >
+        <br />
+        {% if user.is_authenticated %}
+        <a
+          class="danger"
+          href="{% url 'borrar_local_comida' object.id %}"
+          onclick="return confirm('¿Está seguro de la eliminación?')"
+          >eliminar</a
+        >
+        {% else %}
+        <a class="danger" href="{% url 'login' %}">eliminar</a>
+        {% endif %} {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div
+  class="top_menu mt-4"
+  style="width: 20%; align-self: center; background-color: transparent"
+>
+  {% if object_type == 'barrios' %}
+  <button type="button" class="btn btn-success">
+    <a href="{% url 'crear_barrio' %}">Agregar nuevo</a>
+  </button>
+  {% elif object_type == 'personas' %}
+  <button type="button" class="btn btn-success">
+    <a href="{% url 'crear_persona' %}">Agregar nuevo</a>
+  </button>
+  {% elif object_type == 'locales repuestos' %}
+  <button type="button" class="btn btn-success">
+    <a href="{% url 'crear_local_repuesto' %}">Agregar nuevo</a>
+  </button>
+  {% elif object_type == 'locales comida' %}
+  <button type="button" class="btn btn-success">
+    <a href="{% url 'crear_local_comida' %}">Agregar nuevo</a>
+  </button>
+  {% endif %}
+</div>
+
+<script type="text/javascript">
+  $(document).ready(function () {
+    $("#tabla_datos").DataTable({
+      language: {
+        url: "https://cdn.datatables.net/plug-ins/1.13.5/i18n/es-CO.json",
+      },
+      lengthChange: false,
+      info: false,
+    });
+  });
+</script>
+{% endblock %}

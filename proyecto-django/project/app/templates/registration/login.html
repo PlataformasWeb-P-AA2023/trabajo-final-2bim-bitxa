@@ -1,0 +1,13 @@
+{% extends 'master.html' %}
+
+{% block title %}Login - aquí{% endblock %}
+
+{% block content %}
+  <form method="post">
+  <h2>Login</h2>
+    
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Ingresar</button>
+  </form>
+{% endblock %}
