@@ -1,173 +1,74 @@
-## Guía para Desplegar un Proyecto Django con Nginx y Gunicorn en Ubuntu
+## Desplegando un proyecto en Django con Nginx y Gunicorn en MacOS
 
 ### Requisitos Previos
 
-- Una máquina virtual con una versión de Ubuntu LTS.
-- Conexión a Internet para instalar los paquetes y herramientas necesarias.
+- Un sistema Mac.
+- Homebrew instalado.
+- Python3 y pip.
 
-### Paso 1: Instalar y Configurar el Entorno de Django
+### Paso 1: Configuración del entorno Django
 
-1. Actualizar los paquetes del sistema:
+1. Primero instalé Gunicorn usando pip: `pip install gunicorn`.
+2. Mi proyecto Django ya estaba creado y configurado.
 
-   ```bash
-   sudo apt update
-   ```
+### Paso 2: Instalación y Configuración de Nginx
 
-2. Instalar Python y pip:
+1. Luego instalé Nginx utilizando Homebrew: `brew install nginx`.
+2. Navegué hasta el directorio principal de Nginx: `cd /opt/homebrew/etc/nginx/`.
+3. Abrí el archivo `nginx.conf` usando mi editor de texto preferido: `nano nginx.conf`.
+4. Pegué la siguiente configuración en el archivo `nginx.conf`:
 
-   ```bash
-   sudo apt install python3 python3-pip
-   ```
+```nginx
+user  sebastian;
+worker_processes  1;
 
-3. Crear un entorno virtual para el proyecto:
+events {
+    worker_connections  1024;
+}
 
-   ```bash
-   python3 -m venv myenv
-   ```
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
 
-4. Activar el entorno virtual:
+    sendfile        on;
+    keepalive_timeout  65;
 
-   ```bash
-   source myenv/bin/activate
-   ```
+    include /opt/homebrew/etc/nginx/servers/*;
 
-5. Instalar Django y Gunicorn:
+    server {
+        listen      80 default_server;
+        server_name _;
+        return      444;
+    }
+}
+```
 
-   ```bash
-   pip install django gunicorn
-   ```
+5. Navegué hasta el directorio de servidores de Nginx: `cd servers/`.
+6. Creé un nuevo archivo de configuración para mi proyecto llamado proyecto-django: `touch proyecto-django`.
+7. Abrí `proyecto-django` con el editor de texto: `nano proyecto-django`.
+8. Pegué la siguiente configuración en el archivo, ajustando las rutas según sea necesario:
 
-6. Configurar y migrar la base de datos de Django:
-   ```bash
-   cd /ruta/proyecto/django
-   python manage.py makemigrations
-   python manage.py migrate
-   ```
+```nginx
+server {
+    listen 80;
+    server_name localhost;
 
-### Paso 2: Probar el Servidor de Desarrollo de Django
+    location = /favicon.ico { access_log off; log_not_found off; }
 
-1. Iniciar el servidor de desarrollo de Django:
-   ```bash
-   python manage.py runserver
-   ```
+    location /static/ {
+        alias /Users/sebastian/Developer/DesarolloWeb/bimestre2/trabajo-final-2bim-bitxa/proyecto-django/project/static/;
+    }
 
-### Paso 3: Configurar Nginx como Servidor Web
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/tmp/gunicorn.sock;
+    }
+}
+```
 
-1. Instalar Nginx:
+### Paso 3: Lanzamiento del Proyecto Django con Gunicorn
 
-   ```bash
-   sudo apt install nginx
-   ```
+1. Fui al directorio de mi proyecto Django e inicié Gunicorn: `cd /Users/sebastian/Developer/DesarolloWeb/bimestre2/trabajo-final-2bim-bitxa/proyecto-django/project`
+2. Inicié el proyecto de django con gunicorn:
 
-2. Crear un archivo de configuración para el proyecto:
-
-   ```nginx
-   sudo nano /etc/nginx/sites-available/proyecto_django
-   ```
-
-3. Copiar y pegar la siguiente configuración en el archivo, ajustando las rutas y dominios según sea necesario:
-
-   ```nginx
-   #user  nobody;
-   worker_processes  1;
-
-   #error_log logs/error.log;
-   #error_log logs/error.log notice;
-   #error_log logs/error.log info;
-
-   #pid logs/nginx.pid;
-
-   events {
-   worker_connections 1024;
-   }
-
-   http {
-   include mime.types;
-   default_type application/octet-stream;
-
-       sendfile        on;
-       keepalive_timeout  65;
-
-       server {
-           listen       80;
-           server_name  localhost;
-
-           location / {
-               proxy_pass http://localhost:8000;
-               proxy_set_header Host $host;
-               proxy_set_header X-Real-IP $remote_addr;
-               proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-           }
-
-           location /static/ {
-               alias ~/Developer/DesarolloWeb/bimestre2/trabajo-final-2bim-bitxa/proyecto-django/project/app/static/;
-           }
-
-           error_page   500 502 503 504  /50x.html;
-           location = /50x.html {
-               root   html;
-           }
-       }
-
-       include servers/*;
-   }
-
-   ```
-
-4. Crear un enlace simbólico para habilitar el sitio:
-   ```bash
-   sudo ln -s /etc/nginx/sites-available/proyecto_django /etc/nginx/sites-enabled/
-   ```
-
-5. Verificar la configuración de Nginx:
-
-   ```bash
-   sudo nginx -t
-   ```
-
-6. Reiniciar Nginx para aplicar los cambios:
-   ```bash
-   sudo service nginx restart
-   ```
-
-### Paso 4: Configurar Gunicorn
-
-1. Crear un archivo de servicio para Gunicorn:
-
-   ```bash
-   sudo nano /etc/systemd/system/gunicorn.service
-   ```
-
-2. Agregar el siguiente contenido al archivo, ajustando las rutas según sea necesario:
-
-   ```plaintext
-   [Unit]
-   Description=Daemon Gunicorn
-   After=network.target
-
-   [Service]
-   User=tu_usuario
-   Group=www-data
-   WorkingDirectory=/ruta/proyecto/django
-   ExecStart=/ruta/a/entorno_virtual/bin/gunicorn tu_proyecto_django.wsgi:application --bind 127.0.0.1:8000
-
-   [Install]
-   WantedBy=multi-user.target
-   ```
-
-3. Iniciar el servicio de Gunicorn:
-
-   ```bash
-   sudo systemctl start gunicorn
-   ```
-
-4. Habilitar el servicio para que se inicie en el arranque:
-   ```bash
-   sudo systemctl enable gunicorn
-   ```
-
-### Paso 5: Acceder al Proyecto Django a Través de Nginx
-
-1. Accediendo a la dirección IP: `http://localhost:80`.
-   Se debería ver proyecto Django cargado correctamente a través de Nginx.
-
+   `gunicorn project.wsgi:application --bind unix:/tmp/gunicorn.sock --workers 3`

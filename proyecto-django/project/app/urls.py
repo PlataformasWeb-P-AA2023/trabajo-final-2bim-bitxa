@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
 
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 urlpatterns = [
     path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
@@ -40,3 +41,5 @@ urlpatterns = [
     path('borrar_local_comida/<int:id>/',
          views.borrar_local_comida, name='borrar_local_comida'),
 ]
+
+urlpatterns += staticfiles_urlpatterns()

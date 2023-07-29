@@ -21,7 +21,8 @@
       <td>{{ object.pago_permiso }}</td>
       {% else %}
       <td>{{ object|get_attribute:header }}</td>
-      {% endif %} {% endfor %}
+      {% endif %} 
+      {% endfor %}
       <td>
         {% if object_type == 'barrios' %}
         <a class="warning" href="{% url 'editar_barrio' object.id %}">editar</a>
